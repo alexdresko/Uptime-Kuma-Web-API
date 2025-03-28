@@ -39,13 +39,13 @@ echo "Do you want to setup a systemd service? (y/n)"
 read SETUP_SERVICE
 
 if [ "$SETUP_SERVICE" = "y" ]; then
-  ENV_PATH = $(pwd)/.env
+  ENV_PATH=$(pwd)/.env
 
   echo "Enter service name:"
   read SERVICE_NAME
 
-  SERVICE_USER = $(whoami)
-  SERVICE_PATH = $(pwd)
+  SERVICE_USER=$(whoami)
+  SERVICE_PATH=$(pwd)
 
   # Write to service file
   touch $SERVICE_NAME.service
