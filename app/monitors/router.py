@@ -10,6 +10,7 @@ from config import logger as logging
 from .raises import raise_monitor_not_found
 from pings.utils import get_avg_pings
 from uptimes.utils import get_uptimes
+import json
 
 router = APIRouter(redirect_slashes=True)
 
@@ -19,6 +20,7 @@ async def get_monitors(s: JWTSession = Depends(get_jwt_session)):
     try:
         # Convert each monitor dict to a Monitor object
         monitors_data = s.api.get_monitors()
+        logging.info(json.dumps(monitors_data, indent=2))
         monitors = [Monitor(**monitor) for monitor in monitors_data]
         return {"monitors": monitors}
     except Exception as e:

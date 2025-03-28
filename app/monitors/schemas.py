@@ -1,10 +1,21 @@
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel
+from typing import List, Optional, Dict, Any, Union, Literal
+from pydantic import BaseModel, Field, validator, root_validator
 
-from uptime_kuma_api import MonitorType, AuthMethod
+from uptime_kuma_api import MonitorType
+
+
+class KafkaSaslOptions(BaseModel):
+    mechanism: Optional[Literal["None", "plain", "scram-sha-256", "scram-sha-512", "aws"]] = "None"
+    username: Optional[str] = None
+    password: Optional[str] = None
+    authorizationIdentity: Optional[str] = None
+    accessKeyId: Optional[str] = None
+    secretAccessKey: Optional[str] = None
+    sessionToken: Optional[str] = None
 
 
 class Monitor(BaseModel):
+    id: int
     type: MonitorType
     name: str
     parent: Optional[int] = None
@@ -27,7 +38,7 @@ class Monitor(BaseModel):
     httpBodyEncoding: str = "json"
     body: Optional[str] = None
     headers: Optional[str] = None
-    authMethod: AuthMethod = AuthMethod.NONE
+    authMethod: Optional[str] = ""
     tlsCert: Optional[str] = None
     tlsKey: Optional[str] = None
     tlsCa: Optional[str] = None
@@ -48,7 +59,8 @@ class Monitor(BaseModel):
     invertKeyword: bool = False
     hostname: Optional[str] = None
     packetSize: int = 56
-    port: int = 53
+    # Changed to Optional[int] to accept None values
+    port: Optional[int] = 53
 
     # DNS
     dns_resolve_server: str = "1.1.1.1"
@@ -88,10 +100,30 @@ class Monitor(BaseModel):
     kafkaProducerMessage: Optional[str] = None
     kafkaProducerSsl: bool = False
     kafkaProducerAllowAutoTopicCreation: bool = False
-    kafkaProducerSaslOptions: Optional[dict] = None
+    kafkaProducerSaslOptions: Optional[KafkaSaslOptions] = None
 
-class Config:
-    use_enum_values = True
+    @validator('kafkaProducerBrokers', 'kafkaProducerTopic', 'kafkaProducerMessage', pre=True)
+    def ensure_string_type(cls, v):
+        if v is None:
+            return None
+        return str(v)
+
+    @root_validator(pre=True)
+    def check_auth_method(cls, values):
+        if 'authMethod' in values and values['authMethod'] == "":
+            values['authMethod'] = None
+        return values
+
+    @validator('authMethod')
+    def validate_auth_method(cls, v):
+        valid_values = ["", "basic", "ntlm", "mtls", "oauth2-cc", None]
+        if v not in valid_values:
+            raise ValueError(f"authMethod must be one of {valid_values}")
+        return v
+
+    class Config:
+        use_enum_values = True
+        extra = "ignore"  # Ignore extra fields to handle unexpected input
 
 
 class MonitorUpdate(Monitor):
