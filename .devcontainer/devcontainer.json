@@ -3,7 +3,7 @@
 {
 	"name": "Python 3",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/python:1-3.12-bullseye",
+	"image": "mcr.microsoft.com/devcontainers/python:1-3.9-bullseye",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -22,6 +22,20 @@
 	"postCreateCommand": "sudo bash ./.devcontainer/postCreateCommand.sh",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+
+	// Environment variables for the container
+	"remoteEnv": {
+		"KUMA_SERVER": "http://localhost:3001",
+		"KUMA_USERNAME": "test",
+		"KUMA_PASSWORD": "Test&*()",
+		"ADMIN_PASSWORD": "Test&*()",
+		"ACCESS_TOKEN_EXPIRATION": "5",
+		"SECRET_KEY": "2d9f31c34f6d309a3c2b44589a75eac713e19a448575d34c4b1efa861d34e5db",
+		"NAME": "uptime-kuma-web-api",
+		"WORKER_CLASS": "uvicorn.workers.UvicornWorker",
+		"BIND": "0.0.0.0:8000",
+		"LOG_LEVEL": "INFO"
 	}
 
 	// Configure tool-specific properties.
